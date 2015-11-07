@@ -33,6 +33,7 @@
         });
 
         this.pid = this.stream.pid;
+        console.log('PIDDDDDD => ', this.pid);
         this.inputStreamStarted = true;
 
         this.stream.stdout.on('data', function(data) {

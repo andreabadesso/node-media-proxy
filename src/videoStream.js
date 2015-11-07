@@ -41,6 +41,8 @@
             url: this.streamUrl
         });
 
+        this.pid = this.mpeg1Muxer.pid;
+
         if (this.inputStreamStarted) {
             return;
         }
