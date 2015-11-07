@@ -3,6 +3,7 @@
 var Stream      = require('./src'),
     crypto      = require('crypto'),
     redis       = require('redis'),
+    async       = require('async'),
     redisClient = redis.createClient();
 
 var minPort = 3000;
@@ -85,7 +86,64 @@ function _findHashStream(hash, cb) {
     });
 }
 
-function _createStream(streamUrl, cb) {
+function _createStream(hash, port, url, cb) {
+
+    var stream = new Stream({
+        name: hash,
+        streamUrl: url,
+        wsPort: port
+    });
+
+    // Should register the stream PID on redis
+
+    redisClient.set('port:' + port + ':pid', stream.pid, function(err) {
+        return cb(err, stream);
+    });
+}
+
+function _checkPid(pid) {
+    try {
+        return process.kill(pid, 0);
+    }
+    catch(e) {
+        return e.code === 'EPERM';
+    }
+}
+
+function _clearStream(port, cb) {
+    // Getting the stored hash:
+    redisClient.get('port:' + port, function(err, hash) {
+        if (err) {
+            return cb(err);
+        }
+
+        async.parallel([
+            // Killing the port:
+            function(callback) {
+                redisClient.del('port:' + port, function(err) {
+                    callback(err);
+                });
+            },
+            // Killing the pid:
+            function(callback) {
+                redisClient.del('port:' + port + ':pid', function(err) {
+                    callback(err);
+                });
+            },
+            // Killing the hash:
+            function(callback) {
+                redisClient.del('hash:' + hash, function(err) {
+                    callback(err);
+                });
+            }
+        ], function(err) {
+            cb(err);
+        });
+
+    });
+}
+
+function stream(streamUrl, cb) {
     var hash = _generateHash(streamUrl);
 
     _findHashStream(hash, function(err, port) {
@@ -97,8 +155,6 @@ function _createStream(streamUrl, cb) {
         if (!port) {
             // Create the stream
             _getVirginPort(function(err, port) {
-                console.log('err => ', err);
-                console.log('port => ', port);
                 if (err) {
                     // do something
                     return cb(err);
@@ -106,36 +162,59 @@ function _createStream(streamUrl, cb) {
 
                 if (!port) {
                     // do something too
-                    return cb(err);
+                    return cb(new Error('No ports are available'));
                 }
 
-                console.log('port => ', port);
+                var stream = _createStream(hash, port, streamUrl, function(err, stream) {
+                    activeStreams.push(stream);
 
-                // Now we have the port, creating the stream.
-                var stream = new Stream({
-                    name: hash,
-                    streamUrl: streamUrl,
-                    wsPort: port
+                    // Setting the hash to the port on REDIS
+                    redisClient.set('hash:' + hash, port, function(err) {
+                        if (err) {
+                            return cb(err);
+                        }
+                        // Setting the port to the hash on REDIS
+                        redisClient.set('port:' + port, hash, function(err) {
+                            cb(err, port);
+                        });
+                    });
                 });
-
-                activeStreams.push(stream);
-
-                // Setting the hash to the port on REDIS
-                redisClient.set('hash:' + hash, port, function(err) {
-                    cb(err, port);
-                });
-
             });
+
         } else {
             // Already has the port and is active
-            // TODO: Get the process PID number and check if it's alive
-            cb(null, port);
+            redisClient.get('port:' + port + ':pid', function(err, pid) {
+                var isAlive = _checkPid(pid);
+                if (!isAlive) {
+
+                    // Clearing the stream from REDIS and trying to create it
+                    // again
+                    _clearStream(port, function(err) {
+                        if (err) {
+                            return cb(err);
+                        }
+
+                        // Trying again
+                        return stream(streamUrl, cb);
+                    });
+
+                } else {
+                    cb(null, port);
+                }
+            });
         }
     });
 }
 
-module.exports = {
-};
+/*stream('rtsp://184.72.239.149/vod/mp4:BigBuckBunny_115k.mov', function(err, port) {
+    console.log('Port => ', port);
+});*/
+
+/*
+    module.exports = {
+        stream: stream
+    };
+*/
 
 if (process.env.NODE_ENV === 'test') {
     module.exports._generateHash = _generateHash;
@@ -144,7 +223,7 @@ if (process.env.NODE_ENV === 'test') {
     module.exports._minPort = minPort;
     module.exports._findHashStream = _findHashStream;
     module.exports._createStream = _createStream;
-
+    module.exports.stream = stream;
     module.exports._limitPorts = function(min, max) {
         maxPort = max;
         minPort = min;

@@ -117,19 +117,26 @@ describe('Server', function() {
         });
 
         it('Should create an stream object on a random unused port', function(done) {
-            server._createStream('rtsp://184.72.239.149/vod/mp4:BigBuckBunny_115k.mov', function(err, port) {
+            server.stream('rtsp://184.72.239.149/vod/mp4:BigBuckBunny_115k.mov', function(err, port) {
+                expect(err).to.be.null;
                 expect(port).to.be.a('number');
                 done();
             });
         });
 
         it('Should get the stream port if it\'s already opened', function(done) {
+            server._limitPorts(2010, 2010);
+
             var hash = server._generateHash('rtsp://184.72.239.149/vod/mp4:BigBuckBunny_115k.mov');
-            redisClient.set('hash:' + hash, 2010, function(err) {
+
+            redisClient.del('hash:' + hash, function(err) {
                 expect(err).to.be.null;
-                server._createStream('rtsp://184.72.239.149/vod/mp4:BigBuckBunny_115k.mov', function(err, port) {
-                    expect(port).to.equal(2010);
-                    done();
+                redisClient.del('port:' + 2010, function(err) {
+                    expect(err).to.be.null;
+                    server.stream('rtsp://184.72.239.149/vod/mp4:BigBuckBunny_115k.mov', function(err, port) {
+                        expect(port).to.equal(2010);
+                        done();
+                    });
                 });
             });
         });
