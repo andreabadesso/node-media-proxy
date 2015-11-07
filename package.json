@@ -1,0 +1,29 @@
+{
+  "name": "node-media-proxy",
+  "version": "0.0.1",
+  "description": "Proxy RTSP feeds through websockets",
+  "main": "server.js",
+  "scripts": {
+    "test": "npm test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/andreabadesso/node-media-proxy.git"
+  },
+  "keywords": [
+    "node",
+    "rtsp",
+    "proxy",
+    "websockets",
+    "ws",
+    "media",
+    "video",
+    "stream"
+  ],
+  "author": "André Abadesso <andre@lab21k.com.br>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/andreabadesso/node-media-proxy/issues"
+  },
+  "homepage": "https://github.com/andreabadesso/node-media-proxy#readme"
+}
