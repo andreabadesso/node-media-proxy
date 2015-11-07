@@ -224,12 +224,6 @@ app.post('/get_stream', function(req, res) {
 app.listen(2999);
 
 
-/*
-    module.exports = {
-        stream: stream
-    };
-*/
-
 if (process.env.NODE_ENV === 'test') {
     module.exports._generateHash = _generateHash;
     module.exports._getVirginPort = _getVirginPort;

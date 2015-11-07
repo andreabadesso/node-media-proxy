@@ -6,17 +6,47 @@
         <title>
             Media Server
         </title>
-        <script src="app/bower_components/jsmpeg/jsmpg.js">
-        </script>
+        <link rel="stylesheet" href="./css/style.css">
+        <script src="app/bower_components/jsmpeg/jsmpg.js"></script>
+        <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
     </head>
     <body>
+
+        <input type="text" id="url"/>
+        <input type="button" id="pressme" value="Press"/>
+
         <canvas id="canvas" style="width: 500px; height: 300px;">
         </canvas>
         <script>
-            var canvas = document.getElementById('canvas');
-            var client = new WebSocket('ws://localhost:9999');
-            var player = new jsmpeg(client, {
-                canvas: canvas
+            $(document).ready(function() {
+                var button = document.getElementById('pressme');
+                var url = document.getElementById('url');
+                var player = null;
+
+                button.onclick = function() {
+                    var canvas = document.getElementById('canvas');
+
+                    $.ajax({
+                        type: 'POST',
+                        url: 'http://localhost:2999/get_stream',
+                        processData: false,
+                        contentType: 'application/json',
+                        data: JSON.stringify({
+                            "streamUrl": url.value
+                        }),
+                        success: function(r) {
+                            console.log(r.port);
+                            var client = new WebSocket('ws://localhost:' + r.port);
+                            if (player) {
+                                player = null;
+                            }
+                            var player = new jsmpeg(client, {
+                                canvas: canvas
+                            });
+                        }
+                    });
+
+                };
             });
         </script>
     </body>
