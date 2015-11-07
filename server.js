@@ -4,7 +4,10 @@ var Stream      = require('./src'),
     crypto      = require('crypto'),
     redis       = require('redis'),
     async       = require('async'),
-    redisClient = redis.createClient();
+    redisClient = redis.createClient(),
+    express     = require('express'),
+    app         = express(),
+    bodyParser  = require('body-parser');
 
 var minPort = 3000;
 var maxPort = 9999;
@@ -185,6 +188,7 @@ function stream(streamUrl, cb) {
             // Already has the port and is active
             redisClient.get('port:' + port + ':pid', function(err, pid) {
                 var isAlive = _checkPid(pid);
+
                 if (!isAlive) {
 
                     // Clearing the stream from REDIS and trying to create it
@@ -206,9 +210,19 @@ function stream(streamUrl, cb) {
     });
 }
 
-/*stream('rtsp://184.72.239.149/vod/mp4:BigBuckBunny_115k.mov', function(err, port) {
-    console.log('Port => ', port);
-});*/
+app.use(bodyParser.json());
+app.post('/get_stream', function(req, res) {
+    var url = req.body.streamUrl;
+
+    stream(url, function(err, port) {
+        res.send({
+            port: port
+        });
+    });
+});
+
+app.listen(2999);
+
 
 /*
     module.exports = {
