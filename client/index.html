@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width">
+        <title>
+            Media Server
+        </title>
+        <script src="app/bower_components/jsmpeg/jsmpg.js">
+        </script>
+    </head>
+    <body>
+        <canvas id="canvas" style="width: 500px; height: 300px;">
+        </canvas>
+        <script>
+            var canvas = document.getElementById('canvas');
+            var client = new WebSocket('ws://localhost:9999');
+            var player = new jsmpeg(client, {
+                canvas: canvas
+            });
+        </script>
+    </body>
+</html>

@@ -1,0 +1,23 @@
+{
+  "name": "jsmpeg",
+  "authors": [
+    "Dominic Szablewski"
+  ],
+  "description": "jsmpeg library",
+  "main": "jsmpg.js",
+  "keywords": [
+    "jsmpeg"
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/phoboslab/jsmpeg",
+  "_release": "d3297fd9bd",
+  "_resolution": {
+    "type": "branch",
+    "branch": "master",
+    "commit": "d3297fd9bd5a86617ac408fcba3f9a9927194773"
+  },
+  "_source": "git://github.com/antiqe/jsmpeg.git",
+  "_target": "*",
+  "_originalSource": "jsmpeg",
+  "_direct": true
+}

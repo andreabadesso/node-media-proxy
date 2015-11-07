@@ -25,5 +25,8 @@
   "bugs": {
     "url": "https://github.com/andreabadesso/node-media-proxy/issues"
   },
-  "homepage": "https://github.com/andreabadesso/node-media-proxy#readme"
+  "homepage": "https://github.com/andreabadesso/node-media-proxy#readme",
+  "dependencies": {
+    "ws": "^0.8.0"
+  }
 }
