@@ -1,7 +1,7 @@
 (function() {
     'use strict';
 
-    var child_process = require('child_process'),
+    var childProcess = require('child_process'),
         util = require('util'),
         events = require('events');
 
@@ -16,7 +16,7 @@
             }
         };
 
-        this.stream = child_process.spawn('ffmpeg', [
+        this.stream = childProcess.spawn('ffmpeg', [
             '-rtsp_transport',
             'tcp',
             '-i',
@@ -32,6 +32,7 @@
             detached: false
         });
 
+        this.pid = this.stream.pid;
         this.inputStreamStarted = true;
 
         this.stream.stdout.on('data', function(data) {
