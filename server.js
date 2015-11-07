@@ -97,6 +97,10 @@ function _createStream(hash, port, url, cb) {
         wsPort: port
     });
 
+    stream.on('clients', function(clientCount) {
+        _handleClientConnection(clientCount, stream);
+    });
+
     // Should register the stream PID on redis
 
     redisClient.set('port:' + port + ':pid', stream.pid, function(err) {
@@ -113,8 +117,24 @@ function _checkPid(pid) {
     }
 }
 
+function _handleClientConnection(clientCount, stream) {
+    console.log('Clients: ', clientCount);
+    if (clientCount <= 0) {
+        console.log('No more clients!');
+        // do something
+        // Kill the stream in 10s
+        if (!stream.isDying) {
+            stream.isDying = true;
+            stream.death = setTimeout(function() {
+                console.log('DEATH');
+                stream.closeStream();
+            }, 10000);
+        }
+    }
+}
+
 function _clearStream(port, cb) {
-    // Getting the stored hash:
+    // Getting the stored hash from port number:
     redisClient.get('port:' + port, function(err, hash) {
         if (err) {
             return cb(err);
@@ -222,7 +242,6 @@ app.post('/get_stream', function(req, res) {
 });
 
 app.listen(2999);
-
 
 if (process.env.NODE_ENV === 'test') {
     module.exports._generateHash = _generateHash;
