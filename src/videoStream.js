@@ -118,7 +118,6 @@
         return this.on('camdata', function(data) {
             return self.wsServer.broadcast(data);
         });
-
     };
 
     VideoStream.prototype.onSocketConnect = function(socket) {
@@ -133,9 +132,13 @@
             binary: true
         });
 
+        self.emit('clients', self.wsServer.clients.length);
+
         console.log(('' + this.name + ': New WebSocket Connection (') + this.wsServer.clients.length + ' total)');
 
         return socket.on('close', function(code, message) {
+            self.emit('clients', self.wsServer.clients.length);
+
             return console.log(('' + this.name + ': Disconnected WebSocket (') + self.wsServer.clients.length + ' total)');
         });
 
