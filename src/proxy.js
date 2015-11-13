@@ -17,7 +17,7 @@
                     process.exit(1);
                 }
 
-                this.proxy.register(ip + '/get_stream', 'http://' + ip + ':2999/get_stream');
+                this.proxy.register(ip + '/get_stream', 'http://localhost:2999/get_stream');
                 this.proxy.register(ip, 'http://localhost:2999');
 
             }, true);

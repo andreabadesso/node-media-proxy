@@ -255,7 +255,7 @@ app.post('/get_stream', function(req, res) {
             let hash = _generateHash(url);
             let proxyUrl = ip + '/streams/' + hash;
 
-            proxy.register(hash, proxyUrl, 'http://' + ip + ':' + port);
+            proxy.register(hash, proxyUrl, 'http://localhost:' + port);
 
             res.send({
                 proxy: 'ws://' + proxyUrl,
