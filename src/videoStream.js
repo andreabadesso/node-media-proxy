@@ -43,11 +43,11 @@
 
             this.pid = this.mpeg1Muxer.pid;
 
-            this.mpeg1Muxer.on('mpeg1data', function(data) {
+            this.mpeg1Muxer.on('mpeg1data', (data) => {
                 return this.emit('camdata', data);
-            }.bind(this));
+            });
 
-            this.mpeg1Muxer.on('ffmpegError', function(data) {
+            this.mpeg1Muxer.on('ffmpegError', (data) => {
                 let size;
 
                 data = data.toString();
@@ -78,11 +78,11 @@
 
                     }
                 }
-            }.bind(this));
+            });
 
-            this.mpeg1Muxer.on('ffmpegError', function(data) {
+            this.mpeg1Muxer.on('ffmpegError', (data) => {
                 return global.process.stderr.write(data);
-            }.bind(this));
+            });
 
         }
 
@@ -91,9 +91,9 @@
                 port: this.wsPort
             });
 
-            this.wsServer.on('connection', function(socket) {
+            this.wsServer.on('connection', (socket) => {
                 return this.onSocketConnect(socket);
-            }.bind(this));
+            });
 
             this.wsServer.broadcast = function(data, opts) {
                 var i, _results;
@@ -110,9 +110,9 @@
                 return _results;
             };
 
-            return this.on('camdata', function(data) {
+            return this.on('camdata', (data) => {
                 return this.wsServer.broadcast(data);
-            }.bind(this));
+            });
         }
 
         onSocketConnect (socket) {
@@ -130,11 +130,11 @@
 
             console.log(('' + this.name + ': New WebSocket Connection (') + this.wsServer.clients.length + ' total)');
 
-            return socket.on('close', function(code, message) {
+            return socket.on('close', (code, message) => {
                 this.emit('clients', this.wsServer.clients.length);
 
                 return console.log(('' + this.name + ': Disconnected WebSocket (') + this.wsServer.clients.length + ' total)');
-            }.bind(this));
+            });
 
         }
     }
