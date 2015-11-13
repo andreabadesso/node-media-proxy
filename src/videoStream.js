@@ -1,149 +1,144 @@
 (function() {
     'use strict';
 
-    var ws = require('ws');
-    var util = require('util');
-    var events = require('events');
-    var Mpeg1Muxer = require('./mpeg1muxer');
-    var STREAM_MAGIC_BYTES = 'jsmp';
+    const   ws = require('ws'),
+            util = require('util'),
+            events = require('events'),
+            Mpeg1Muxer = require('./mpeg1muxer'),
+            STREAM_MAGIC_BYTES = 'jsmp';
 
-    var VideoStream = function(options) {
+    class VideoStream extends events.EventEmitter {
 
-        this.name = options.name;
-        this.streamUrl = options.streamUrl;
-        this.width = options.width;
-        this.height = options.height;
-        this.wsPort = options.wsPort;
-        this.inputStreamStarted = false;
-        this.startMpeg1Stream();
-        this.pipeStreamToSocketServer();
-
-        return this;
-    };
-
-    util.inherits(VideoStream, events.EventEmitter);
-
-    VideoStream.prototype.closeStream = function() {
-        this.mpeg1Muxer.closeMuxer();
-        this.wsServer.close();
-    };
-
-    VideoStream.prototype.startMpeg1Stream = function() {
-
-        var self = this;
-
-        var gettingInputData = false;
-        var inputData = [];
-        var gettingOutputData = false;
-        var outputData = [];
-
-        this.mpeg1Muxer = new Mpeg1Muxer({
-            url: this.streamUrl
-        });
-
-        this.pid = this.mpeg1Muxer.pid;
-
-        if (this.inputStreamStarted) {
-            return;
+        constructor(options) {
+            super();
+            this.name = options.name;
+            this.streamUrl = options.streamUrl;
+            this.width = options.width;
+            this.height = options.height;
+            this.wsPort = options.wsPort;
+            this.inputStreamStarted = false;
+            this.startMpeg1Stream();
+            this.pipeStreamToSocketServer();
         }
 
-        // Events
+        closeStream() {
+            this.mpeg1Muxer.closeMuxer();
+            this.wsServer.close();
+        }
 
-        this.mpeg1Muxer.on('mpeg1data', function(data) {
-            return self.emit('camdata', data);
-        });
+        startMpeg1Stream() {
 
-        this.mpeg1Muxer.on('ffmpegError', function(data) {
-            var size;
-            data = data.toString();
-            if (data.indexOf('Input #') !== -1) {
-                gettingInputData = true;
+            if (this.inputStreamStarted) {
+                return;
             }
-            if (data.indexOf('Output #') !== -1) {
-                gettingInputData = false;
-                gettingOutputData = true;
-            }
-            if (data.indexOf('frame') === 0) {
-                gettingOutputData = false;
-            }
-            if (gettingInputData) {
-                inputData.push(data.toString());
-                size = data.match(/\d+x\d+/);
-                if (size != null) {
-                    size = size[0].split('x');
 
-                    if (self.width == null) {
-                        self.width = parseInt(size[0], 10);
-                    }
-                    if (self.height == null) {
-                        return self.height = parseInt(size[1], 10);
+            let gettingInputData = false;
+            let gettingOutputData = false;
+            let inputData = [];
+            let outputData = [];
+
+            this.mpeg1Muxer = new Mpeg1Muxer({
+                url: this.streamUrl
+            });
+
+            this.pid = this.mpeg1Muxer.pid;
+
+            this.mpeg1Muxer.on('mpeg1data', function(data) {
+                return this.emit('camdata', data);
+            }.bind(this));
+
+            this.mpeg1Muxer.on('ffmpegError', function(data) {
+                let size;
+
+                data = data.toString();
+
+                if (data.indexOf('Input #') !== -1) {
+                    gettingInputData = true;
+                }
+                if (data.indexOf('Output #') !== -1) {
+                    gettingInputData = false;
+                    gettingOutputData = true;
+                }
+                if (data.indexOf('frame') === 0) {
+                    gettingOutputData = false;
+                }
+                if (gettingInputData) {
+                    inputData.push(data.toString());
+                    size = data.match(/\d+x\d+/);
+
+                    if (size != null) {
+                        size = size[0].split('x');
+
+                        if (this.width == null) {
+                            this.width = parseInt(size[0], 10);
+                        }
+                        if (this.height == null) {
+                            return this.height = parseInt(size[1], 10);
+                        }
+
                     }
                 }
-            }
-        });
+            }.bind(this));
 
-        this.mpeg1Muxer.on('ffmpegError', function(data) {
-            return global.process.stderr.write(data);
-        });
+            this.mpeg1Muxer.on('ffmpegError', function(data) {
+                return global.process.stderr.write(data);
+            }.bind(this));
 
-        return this;
-    };
+        }
 
-    VideoStream.prototype.pipeStreamToSocketServer = function() {
-        var self = this;
+        pipeStreamToSocketServer() {
+            this.wsServer = new ws.Server({
+                port: this.wsPort
+            });
 
-        this.wsServer = new ws.Server({
-            port: this.wsPort
-        });
+            this.wsServer.on('connection', function(socket) {
+                return this.onSocketConnect(socket);
+            }.bind(this));
 
-        this.wsServer.on('connection', function(socket) {
-            return self.onSocketConnect(socket);
-        });
+            this.wsServer.broadcast = function(data, opts) {
+                var i, _results;
+                _results = [];
 
-        this.wsServer.broadcast = function(data, opts) {
-            var i, _results;
-            _results = [];
-
-            for (i in this.clients) {
-                if (this.clients[i].readyState === 1) {
-                    _results.push(this.clients[i].send(data, opts));
-                } else {
-                    _results.push(console.log('Error: Client (' + i + ') not connected.'));
+                for (i in this.clients) {
+                    if (this.clients[i].readyState === 1) {
+                        _results.push(this.clients[i].send(data, opts));
+                    } else {
+                        _results.push(console.log('Error: Client (' + i + ') not connected.'));
+                    }
                 }
-            }
 
-            return _results;
-        };
+                return _results;
+            };
 
-        return this.on('camdata', function(data) {
-            return self.wsServer.broadcast(data);
-        });
-    };
+            return this.on('camdata', function(data) {
+                return this.wsServer.broadcast(data);
+            }.bind(this));
+        }
 
-    VideoStream.prototype.onSocketConnect = function(socket) {
-        var self = this;
-        var streamHeader = new Buffer(8);
+        onSocketConnect (socket) {
+            let streamHeader = new Buffer(8);
 
-        streamHeader.write(STREAM_MAGIC_BYTES);
-        streamHeader.writeUInt16BE(this.width, 4);
-        streamHeader.writeUInt16BE(this.height, 6);
+            streamHeader.write(STREAM_MAGIC_BYTES);
+            streamHeader.writeUInt16BE(this.width, 4);
+            streamHeader.writeUInt16BE(this.height, 6);
 
-        socket.send(streamHeader, {
-            binary: true
-        });
+            socket.send(streamHeader, {
+                binary: true
+            });
 
-        self.emit('clients', self.wsServer.clients.length);
+            this.emit('clients', this.wsServer.clients.length);
 
-        console.log(('' + this.name + ': New WebSocket Connection (') + this.wsServer.clients.length + ' total)');
+            console.log(('' + this.name + ': New WebSocket Connection (') + this.wsServer.clients.length + ' total)');
 
-        return socket.on('close', function(code, message) {
-            self.emit('clients', self.wsServer.clients.length);
+            return socket.on('close', function(code, message) {
+                this.emit('clients', this.wsServer.clients.length);
 
-            return console.log(('' + this.name + ': Disconnected WebSocket (') + self.wsServer.clients.length + ' total)');
-        });
+                return console.log(('' + this.name + ': Disconnected WebSocket (') + this.wsServer.clients.length + ' total)');
+            }.bind(this));
 
-    };
+        }
+    }
 
     module.exports = VideoStream;
 
-}).call(this);
+}());

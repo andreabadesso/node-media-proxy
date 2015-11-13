@@ -1,6 +1,6 @@
 'use strict';
 
-var Stream      = require('./src'),
+const Stream      = require('./src'),
     crypto      = require('crypto'),
     redis       = require('redis'),
     async       = require('async'),
@@ -9,15 +9,15 @@ var Stream      = require('./src'),
     app         = express(),
     bodyParser  = require('body-parser');
 
-var minPort = 3000;
-var maxPort = 9999;
-var activeStreams = [].slice();
+let minPort = 3000;
+let maxPort = 9999;
+let activeStreams = [].slice();
 
 /*
  * Generates a hash for an URL
  */
 function _generateHash(url) {
-    var cryptoUrl = crypto.createHash('md5').update(url).digest("hex");
+    let cryptoUrl = crypto.createHash('md5').update(url).digest("hex");
     return cryptoUrl;
 }
 
@@ -26,7 +26,7 @@ function _generateHash(url) {
  * ports in range are being used.
  */
 function _getRandomPort(blackList) {
-    var port = Math.floor(Math.random() * (maxPort - minPort + 1)) + minPort;
+    let port = Math.floor(Math.random() * (maxPort - minPort + 1)) + minPort;
 
     /* Finding if all ports are on blackList by checking its length
      * TODO: Find a more efficient way to do this
@@ -91,7 +91,7 @@ function _findHashStream(hash, cb) {
 
 function _createStream(hash, port, url, cb) {
 
-    var stream = new Stream({
+    let stream = new Stream({
         name: hash,
         streamUrl: url,
         wsPort: port
@@ -118,17 +118,16 @@ function _checkPid(pid) {
 }
 
 function _handleClientConnection(clientCount, stream) {
-    console.log('Clients: ', clientCount);
     if (clientCount <= 0) {
         console.log('No more clients!');
         // do something
         // Kill the stream in 10s
         if (!stream.isDying) {
             stream.isDying = true;
-            stream.death = setTimeout(function() {
+            /*stream.death = setTimeout(function() {
                 console.log('DEATH');
                 stream.closeStream();
-            }, 10000);
+            }, 10000);*/
         }
     }
 }
@@ -167,7 +166,7 @@ function _clearStream(port, cb) {
 }
 
 function stream(streamUrl, cb) {
-    var hash = _generateHash(streamUrl);
+    let hash = _generateHash(streamUrl);
 
     _findHashStream(hash, function(err, port) {
         if (err) {
@@ -188,7 +187,7 @@ function stream(streamUrl, cb) {
                     return cb(new Error('No ports are available'));
                 }
 
-                var stream = _createStream(hash, port, streamUrl, function(err, stream) {
+                let stream = _createStream(hash, port, streamUrl, function(err, stream) {
                     activeStreams.push(stream);
 
                     // Setting the hash to the port on REDIS
@@ -207,7 +206,7 @@ function stream(streamUrl, cb) {
         } else {
             // Already has the port and is active
             redisClient.get('port:' + port + ':pid', function(err, pid) {
-                var isAlive = _checkPid(pid);
+                let isAlive = _checkPid(pid);
 
                 if (!isAlive) {
 
@@ -232,7 +231,7 @@ function stream(streamUrl, cb) {
 
 app.use(bodyParser.json());
 app.post('/get_stream', function(req, res) {
-    var url = req.body.streamUrl;
+    let url = req.body.streamUrl;
 
     stream(url, function(err, port) {
         res.send({
