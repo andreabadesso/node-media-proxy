@@ -32,9 +32,9 @@
                         processData: false,
                         contentType: 'application/json',
                         data: JSON.stringify({
-                            "streamUrl": 'rtsp://184.72.239.149/vod/mp4:BigBuckBunny_115k.mov'
+                            //"streamUrl": 'rtsp://184.72.239.149/vod/mp4:BigBuckBunny_115k.mov'
                             //"streamUrl": 'rtsp://rtsp:comtex@10.50.200.29/Interface/Cameras/Media?Camera=600'
-                            //url.value
+                            url.value
                         }),
                         success: function(r) {
                             var client = new WebSocket(r.proxy);
