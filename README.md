@@ -16,7 +16,8 @@ If it's not, it will start a WS server on a random port, convert the RTSP stream
 
 ### Roadmap
 
-* Streaming most common formats (RTSP, RTMP)
 * Gateway to proxy ports from port 80
+* Streaming most common formats (RTSP, RTMP)
 * Auto scaling
 * Monitoring API
+* Admin area with configurable options

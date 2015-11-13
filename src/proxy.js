@@ -6,6 +6,7 @@
 
     class Proxy {
         constructor(port) {
+            this.registeredRoutes = {};
             this.proxy = redbird({
                 port: port || 80
             });
@@ -22,12 +23,18 @@
             }, true);
         }
 
-        register(from, to) {
+        register(hash, from, to) {
+            if (this.registeredRoutes.hasOwnProperty(hash)) {
+                this.proxy.unregister(this.registeredRoutes[hash]);
+            }
+            this.registeredRoutes[hash] = from;
             this.proxy.register(from, to);
         }
 
-        unregister(url) {
-            this.proxy.unregister(url);
+        unregister(hash) {
+            if (this.registeredRoutes.hasOwnProperty(hash)) {
+                this.proxy.unregister(this.registeredRoutes[hash]);
+            }
         }
     }
 

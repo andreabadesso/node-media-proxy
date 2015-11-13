@@ -8,7 +8,8 @@ const   Stream          = require('./src'),
         express         = require('express'),
         app             = express(),
         bodyParser      = require('body-parser'),
-        networkUtils    = require('./util/network');
+        networkUtils    = require('./util/network'),
+        Proxy           = require('./src/proxy');
 
 let minPort = 3000;
 let maxPort = 9999;
@@ -230,26 +231,31 @@ function stream(streamUrl, cb) {
 }
 
 app.use(bodyParser.json());
-app.use(express.static('client'));
 
-const Proxy = require('./src/proxy');
+/*
+ * Serve client folder statically
+ */
+app.use(express.static('client'));
 
 let proxy = new Proxy();
 
+/*
+ * Configure express.js route to get stream
+ */
 app.post('/get_stream', function(req, res) {
     let url = req.body.streamUrl;
 
     stream(url, function(err, port) {
-        let hash = _generateHash(url);
-        let proxyUrl = '192.168.1.141/streams/' + hash;
-
         networkUtils.getNetworkIp(function (error, ip) {
             if (error) {
                 ip = '127.0.0.1';
                 console.log('Error getting ip, defaulting to 127.0.0.1');
             }
 
-            proxy.register(proxyUrl, 'http://' + ip + ':' + port);
+            let hash = _generateHash(url);
+            let proxyUrl = ip + '/streams/' + hash;
+
+            proxy.register(hash, proxyUrl, 'http://' + ip + ':' + port);
 
             res.send({
                 proxy: 'ws://' + proxyUrl,
