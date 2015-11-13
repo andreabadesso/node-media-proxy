@@ -20,6 +20,11 @@
                 break;
         }
 
+        // Get host from env variable
+        if (process.env.HOSTNAME) {
+            callback(null, process.env.HOSTNAME);
+            return;
+        }
         // get cached value
         if (cached && !bypassCache) {
             callback(null, cached);
