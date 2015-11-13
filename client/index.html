@@ -28,15 +28,16 @@
 
                     $.ajax({
                         type: 'POST',
-                        url: 'http://localhost:2999/get_stream',
+                        url: 'http://192.168.1.141/get_stream',
                         processData: false,
                         contentType: 'application/json',
                         data: JSON.stringify({
-                            "streamUrl": url.value
+                            "streamUrl": 'rtsp://184.72.239.149/vod/mp4:BigBuckBunny_115k.mov'
+                            //"streamUrl": 'rtsp://rtsp:comtex@10.50.200.29/Interface/Cameras/Media?Camera=600'
+                            //url.value
                         }),
                         success: function(r) {
-                            console.log(r.port);
-                            var client = new WebSocket('ws://localhost:' + r.port);
+                            var client = new WebSocket(r.proxy);
                             if (player) {
                                 player = null;
                             }

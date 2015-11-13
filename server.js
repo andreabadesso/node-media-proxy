@@ -1,13 +1,14 @@
 'use strict';
 
-const Stream      = require('./src'),
-    crypto      = require('crypto'),
-    redis       = require('redis'),
-    async       = require('async'),
-    redisClient = redis.createClient(),
-    express     = require('express'),
-    app         = express(),
-    bodyParser  = require('body-parser');
+const   Stream          = require('./src'),
+        crypto          = require('crypto'),
+        redis           = require('redis'),
+        async           = require('async'),
+        redisClient     = redis.createClient(),
+        express         = require('express'),
+        app             = express(),
+        bodyParser      = require('body-parser'),
+        networkUtils    = require('./util/network');
 
 let minPort = 3000;
 let maxPort = 9999;
@@ -102,7 +103,6 @@ function _createStream(hash, port, url, cb) {
     });
 
     // Should register the stream PID on redis
-
     redisClient.set('port:' + port + ':pid', stream.pid, function(err) {
         return cb(err, stream);
     });
@@ -230,13 +230,33 @@ function stream(streamUrl, cb) {
 }
 
 app.use(bodyParser.json());
+app.use(express.static('client'));
+
+const Proxy = require('./src/proxy');
+
+let proxy = new Proxy();
+
 app.post('/get_stream', function(req, res) {
     let url = req.body.streamUrl;
 
     stream(url, function(err, port) {
-        res.send({
-            port: port
-        });
+        let hash = _generateHash(url);
+        let proxyUrl = '192.168.1.141/streams/' + hash;
+
+        networkUtils.getNetworkIp(function (error, ip) {
+            if (error) {
+                ip = '127.0.0.1';
+                console.log('Error getting ip, defaulting to 127.0.0.1');
+            }
+
+            proxy.register(proxyUrl, 'http://' + ip + ':' + port);
+
+            res.send({
+                proxy: 'ws://' + proxyUrl,
+                port: port
+            });
+
+        }, false);
     });
 });
 

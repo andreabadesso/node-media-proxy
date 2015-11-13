@@ -4,7 +4,7 @@
   "description": "Proxy RTSP feeds through websockets",
   "main": "server.js",
   "scripts": {
-    "test": "npm test"
+    "test": "mocha"
   },
   "repository": {
     "type": "git",
@@ -30,6 +30,7 @@
     "async": "^1.5.0",
     "body-parser": "^1.14.1",
     "express": "^4.13.3",
+    "http-proxy": "^1.12.0",
     "redis": "^2.3.0",
     "ws": "^0.8.0"
   },
