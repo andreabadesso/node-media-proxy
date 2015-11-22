@@ -30,16 +30,16 @@
                 client = null;
             }
             client = new WebSocket(url);
-            var currentActive = 'video1';
             client.onmessage = function(data) {
                 IsValidImageUrl('data:image/jpeg;base64,' +
                     data.data, function(err) {
                         if (err) {
+                            console.log('invalid');
                             return;
                         }
 
                         try {
-                            $('.video').css(
+                            $('.player').css(
                                 'background',
                                 _generateCss(data
                                     .data)
