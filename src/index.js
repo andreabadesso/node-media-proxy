@@ -1,7 +1,7 @@
 (function() {
     'use strict';
 
-    const VideoStream = require('./videoStream');
+    const VideoStream = require('./MJPEGVideoStream');
 
     module.exports = VideoStream;
 

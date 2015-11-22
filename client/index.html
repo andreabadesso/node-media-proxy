@@ -9,6 +9,20 @@
         <link rel="stylesheet" href="./css/style.css">
         <script src="app/bower_components/jsmpeg/jsmpg.js"></script>
         <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+        <style>
+
+            .video-wrapper {
+                width: 500px;
+                height: 300px;
+                position: relative;
+            }
+
+            .video1 {
+                width: 500px;
+                height: 300px;
+            }
+
+        </style>
     </head>
     <body>
 
@@ -26,6 +40,8 @@
         <input type="text" id="ws"/>
         <input type="button" id="press_ws" value="Press"/>
 
+        <div id="video1" class="video1" style="width: 500px; height: 300px;"></div>
+
         <canvas id="canvas" style="width: 500px; height: 300px;">
         </canvas>
 
@@ -33,20 +49,46 @@
             $(document).ready(function() {
                 var player;
 
+                function _generateCss(data) {
+                    var string = 'transparent url(data:image/jpeg;base64,' + data;
+                    string += ') top left / 100% 100% no-repeat';
+
+                    return string;
+                }
+
+                function IsValidImageUrl(url, callback) {
+                    $("<img>", {
+                        src: url,
+                        error: function() {
+                            callback(true);
+                        },
+                        load: function() {
+                            callback(null);
+                        }
+                    });
+                }
+
                 function playVideo(url) {
                     var canvas = document.getElementById('canvas');
                     var client = new WebSocket(url);
-
-                    setTimeout(function() {
-                        player = new jsmpeg(client, {
-                            canvas: canvas
+                    var currentActive = 'video1';
+                    client.onmessage = function(data) {
+                        IsValidImageUrl('data:image/jpeg;base64,' + data.data, function(err) {
+                            if (err) {
+                                return;
+                            }
+                            try {
+                                $('.video1').css(
+                                    'background',
+                                    _generateCss(data.data)
+                                );
+                            } catch(e) {
+                                console.log('fail');
+                            }
                         });
-                    }, 2000);
-
-                    console.log({
-                        player: player
-                    });
+                    };
                 }
+
                 var button = document.getElementById('pressme');
                 var buttonWs = document.getElementById('press_ws');
                 var url = document.getElementById('url');

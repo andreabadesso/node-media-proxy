@@ -7,7 +7,7 @@
             Mpeg1Muxer = require('./mpeg1muxer'),
             STREAM_MAGIC_BYTES = 'jsmp';
 
-    class VideoStream extends events.EventEmitter {
+    class Mpeg1VideoStream extends events.EventEmitter {
 
         constructor(options) {
             super();
@@ -27,7 +27,6 @@
         }
 
         startMpeg1Stream() {
-
             if (this.inputStreamStarted) {
                 return;
             }
@@ -139,6 +138,6 @@
         }
     }
 
-    module.exports = VideoStream;
+    module.exports = Mpeg1VideoStream;
 
 }());
