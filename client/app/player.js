@@ -13,6 +13,18 @@
             return string;
         }
 
+        function IsValidImageUrl(url, callback) {
+            $("<img>", {
+                src: url,
+                error: function() {
+                    callback(true);
+                },
+                load: function() {
+                    callback(null);
+                }
+            });
+        }
+
         function playVideo(url) {
             if (client) {
                 client = null;
