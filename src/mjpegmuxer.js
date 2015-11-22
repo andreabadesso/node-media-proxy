@@ -10,6 +10,7 @@
         constructor(options) {
             super();
             this.url = options.url;
+
             this.stream = childProcess.spawn('ffmpeg', [
                 '-rtsp_transport',
                 'tcp',
@@ -17,10 +18,10 @@
                 this.url,
                 '-f',
                 'mjpeg',
-                '-b:v',
-                '1000k',
+		'-q:v',
+		'3',
                 '-r',
-                '60',
+                '30',
                 '-'
             ], {
                 detached: false
