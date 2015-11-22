@@ -17,6 +17,7 @@
     "tests"
   ],
   "dependencies": {
-    "jsmpeg": "*"
+    "jsmpeg": "*",
+    "material-design-lite": "~1.0.6"
   }
 }
