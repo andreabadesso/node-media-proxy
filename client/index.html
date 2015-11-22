@@ -35,9 +35,12 @@
             function playVideo(url) {
                 var canvas = document.getElementById('canvas');
                 var client = new WebSocket(url);
-                var player = new jsmpeg(client, {
-                    canvas: canvas
-                });
+
+                setTimeout(function() {
+                    var player = new jsmpeg(client, {
+                        canvas: canvas
+                    });
+                }, 2000);
 
                 console.log({
                     player: player
@@ -67,7 +70,7 @@
                 };
 
                 buttonWs.onclick = function() {
-                    playVideo(url.value);
+                    playVideo(urlWs.value);
                 };
             });
         </script>
