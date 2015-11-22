@@ -30,24 +30,23 @@
         </canvas>
 
         <script>
-            var player;
-
-            function playVideo(url) {
-                var canvas = document.getElementById('canvas');
-                var client = new WebSocket(url);
-
-                setTimeout(function() {
-                    player = new jsmpeg(client, {
-                        canvas: canvas
-                    });
-                }, 2000);
-
-                console.log({
-                    player: player
-                });
-            }
-
             $(document).ready(function() {
+                var player;
+
+                function playVideo(url) {
+                    var canvas = document.getElementById('canvas');
+                    var client = new WebSocket(url);
+
+                    setTimeout(function() {
+                        player = new jsmpeg(client, {
+                            canvas: canvas
+                        });
+                    }, 2000);
+
+                    console.log({
+                        player: player
+                    });
+                }
                 var button = document.getElementById('pressme');
                 var buttonWs = document.getElementById('press_ws');
                 var url = document.getElementById('url');
