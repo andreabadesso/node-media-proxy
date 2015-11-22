@@ -12,41 +12,62 @@
     </head>
     <body>
 
+        <h1>
+            RTSP Feed
+        </h1>
+
         <input type="text" id="url"/>
         <input type="button" id="pressme" value="Press"/>
 
+        <h1>
+            WS Feed
+        </h1>
+
+        <input type="text" id="ws"/>
+        <input type="button" id="press_ws" value="Press"/>
+
         <canvas id="canvas" style="width: 500px; height: 300px;">
         </canvas>
+
         <script>
+            var player;
+
+            function playVideo(url) {
+                var canvas = document.getElementById('canvas');
+                var client = new WebSocket(url);
+                var player = new jsmpeg(client, {
+                    canvas: canvas
+                });
+
+                console.log({
+                    player: player
+                });
+            }
+
             $(document).ready(function() {
                 var button = document.getElementById('pressme');
+                var buttonWs = document.getElementById('press_ws');
                 var url = document.getElementById('url');
-                var player = null;
+                var urlWs = document.getElementById('ws');
+
 
                 button.onclick = function() {
-                    var canvas = document.getElementById('canvas');
-
                     $.ajax({
                         type: 'POST',
                         url: '/get_stream',
                         processData: false,
                         contentType: 'application/json',
                         data: JSON.stringify({
-                            //"streamUrl": 'rtsp://184.72.239.149/vod/mp4:BigBuckBunny_115k.mov'
-                            //"streamUrl": 'rtsp://rtsp:comtex@10.50.200.29/Interface/Cameras/Media?Camera=600'
                             "streamUrl": url.value
                         }),
                         success: function(r) {
-                            var client = new WebSocket(r.proxy);
-                            if (player) {
-                                player = null;
-                            }
-                            var player = new jsmpeg(client, {
-                                canvas: canvas
-                            });
+                            playVideo(r.proxy);
                         }
                     });
+                };
 
+                buttonWs.onclick = function() {
+                    playVideo(url.value);
                 };
             });
         </script>
