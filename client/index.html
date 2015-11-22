@@ -37,7 +37,7 @@
                 var client = new WebSocket(url);
 
                 setTimeout(function() {
-                    var player = new jsmpeg(client, {
+                    player = new jsmpeg(client, {
                         canvas: canvas
                     });
                 }, 2000);
