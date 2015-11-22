@@ -36,7 +36,6 @@
         }
 
         function playVideo(url) {
-            var canvas = document.getElementById('canvas');
             if (client) {
                 client = null;
             }
@@ -50,7 +49,7 @@
                         }
 
                         try {
-                            $('.video1').css(
+                            $('.video').css(
                                 'background',
                                 _generateCss(data
                                     .data)
