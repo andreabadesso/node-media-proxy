@@ -22,6 +22,7 @@
 		'3',
                 '-r',
                 '30',
+		'-deinterlace',
                 '-'
             ], {
                 detached: false
