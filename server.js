@@ -255,7 +255,6 @@ app.post('/get_stream', function(req, res) {
             let hash = _generateHash(url);
             let proxyUrl = ip + '/streams/' + hash;
 
-	    //let proxyUrl = 'geoportal.cor.rio.gov.br/rotas/cameras/streams/' + hash;
             proxy.register(hash, proxyUrl, 'http://localhost:' + port);
 
             res.send({
