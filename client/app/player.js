@@ -78,10 +78,13 @@
              * every 5 seconds.
              */
             if (!this.checkConnection) {
+		console.log('No check connection');
                 this.checkConnection = this._debounce(function() {
                     console.log('Retrying connection.');
                     this.init();
-                }.bind(this), 5000)();
+                }.bind(this), 5000);
+
+		this.checkConnection();
             } else {
                 this.checkConnection();
             }
