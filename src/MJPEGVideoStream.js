@@ -41,13 +41,8 @@
             });
 
             this.MJPEGStream.on('ffmpegError', (data) => {
-                // Do nothing.
-            });
-
-            this.MJPEGStream.on('ffmpegError', (data) => {
                 return global.process.stderr.write(data);
             });
-
         }
 
         pipeStreamToSocketServer() {

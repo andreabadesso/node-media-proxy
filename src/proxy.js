@@ -17,8 +17,6 @@
                     process.exit(1);
                 }
 
-		//ip = 'http://geoportal.cor.rio.gov.br/rotas/cameras';
-
                 this.proxy.register(ip + '/get_stream', 'http://localhost:2999/get_stream');
                 this.proxy.register(ip, 'http://localhost:2999');
 

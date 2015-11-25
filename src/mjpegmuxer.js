@@ -18,11 +18,11 @@
                 this.url,
                 '-f',
                 'mjpeg',
-		'-q:v',
-		'3',
+                '-q:v',
+                '3',
                 '-r',
                 '30',
-		'-deinterlace',
+                '-deinterlace',
                 '-'
             ], {
                 detached: false
