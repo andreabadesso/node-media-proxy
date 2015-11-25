@@ -9,9 +9,7 @@
 
     Player.prototype.init = function() {
         this._jsonRequest('/get_stream', this.body, function(data) {
-            if (typeof data !== 'object') {
-                data = JSON.parse(data);
-            }
+            console.log(data);
             this._playVideo(data.proxy);
         }.bind(this));
     };
@@ -22,9 +20,7 @@
         xhr.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
         xhr.send(JSON.stringify(body));
 
-        xhr.onloadend = function() {
-            callback(xhr.response);
-        };
+        xhr.onloadend = callback.call(this, [xhr.response]);
     };
 
     Player.prototype._generateCss = function(data) {
@@ -39,7 +35,7 @@
     Player.prototype._isValidImageUrl = function(url, callback) {
         var image = new Image();
         image.onerror = callback.apply(this, [false]);
-        image.onload = callback.apply(this, [null]);
+        image.onload = callback.aplly(this, [null]);
 
         image.src = url;
     };
