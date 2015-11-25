@@ -71,7 +71,22 @@
              * Updates the div background image to display images if it was a
              * video.
              */
-            this.player.style.background = this._generateCss(image);
+
+	    var context = this.player.getContext('2d');
+	    var imgObj = new Image();
+	    var self = this;
+
+	    imgObj.onload = function() {
+                context.drawImage(this, 0, 0, this.width, this.height,
+					0, 0, self.player.width, self.player.height);
+	    };
+            imgObj.src = 'data:image/jpeg;base64,' + image;
+	    
+	    /*
+	    setTimeout(function() {
+	        this.player.style.background = this._generateCss(image);
+	    }.bind(this), 150);
+	    */
 
             /*
              * Debounced call to reconnect to request the stream again
